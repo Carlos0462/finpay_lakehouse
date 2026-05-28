@@ -1,0 +1,45 @@
+# resources/finpay_ingestion_job.yml
+
+resources:
+  jobs:
+    finpay_ingestion_job:
+      name: finpay_ingestion_job_${bundle.target}
+
+      description: >
+        Job principal de ingesta FinPay. Ejecuta el Lakeflow Declarative Pipeline
+        completo para procesar las capas Bronze, Silver y Gold.
+
+      tags:
+        project: finpay_lakehouse
+        job_type: ingestion
+        environment: ${bundle.target}
+        owner: data_engineering
+
+      email_notifications:
+        on_failure:
+          - ${var.notification_email}
+
+      notification_settings:
+        no_alert_for_skipped_runs: false
+
+      timeout_seconds: 7200
+      max_concurrent_runs: 1
+
+      tasks:
+        - task_key: run_finpay_etl_pipeline
+          description: >
+            Ejecuta el pipeline declarativo FinPay ETL completo:
+            Bronze, Silver y Gold.
+
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.finpay_etl_pipeline.id}
+            full_refresh: false
+
+          max_retries: 2
+          min_retry_interval_millis: 300000
+          retry_on_timeout: true
+          timeout_seconds: 7200
+
+          email_notifications:
+            on_failure:
+              - ${var.notification_email}

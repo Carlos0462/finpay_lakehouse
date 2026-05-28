@@ -1,0 +1,7 @@
+
+resources:
+  dashboards:
+    finpay_observability_dashboard:
+      display_name: FinPay Observability Dashboard - ${bundle.target}
+      file_path: ../dashboards/observability.lvdash.json
+      warehouse_id: ${var.warehouse_id}

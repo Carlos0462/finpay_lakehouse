@@ -10,8 +10,6 @@ bundle:
 include:
   - resources/*.yml
 
-# Files that must be deployed to the workspace under:
-# /Workspace/Users/<user>/.bundle/finpay_lakehouse/<target>/files
 sync:
   include:
     - notebooks/**
@@ -29,13 +27,11 @@ sync:
     - "*.pyc"
     - ".DS_Store"
 
-# Keep the wheel artifact only if your pyproject.toml is ready for package build.
-# If `databricks bundle validate/deploy` fails because of `uv build --wheel`,
-# temporarily comment this block until the source package is ready.
-artifacts:
-  python_artifact:
-    type: whl
-    build: uv build --wheel
+# Mantener comentado hasta que el pyproject.toml esté listo para construir wheel.
+# artifacts:
+#   python_artifact:
+#     type: whl
+#     build: uv build --wheel
 
 variables:
   catalog:
@@ -52,6 +48,18 @@ variables:
     description: SQL Warehouse ID used by semantic/materialized view jobs
     default: ""
 
+  notification_email:
+    description: Email para alertas de fallo de jobs y pipelines
+    default: carlos.garciah@pucp.edu.pe
+
+  pipeline_development:
+    description: Indica si el pipeline corre en modo desarrollo
+    default: true
+
+  cluster_policy_id:
+    description: Cluster policy ID para jobs o pipelines cuando aplique
+    default: ""
+
 targets:
   dev:
     mode: development
@@ -63,8 +71,12 @@ targets:
 
     variables:
       catalog: fintech_finpay_dev
-      schema: dev
+      schema: default
       landing_volume: vol_landing
+      warehouse_id: "c6cb83fa9d6d6137"
+      notification_email: carlos.garciah@pucp.edu.pe
+      pipeline_development: true
+      cluster_policy_id: ""
 
     permissions:
       - user_name: carlos.garciah@pucp.edu.pe
@@ -79,8 +91,12 @@ targets:
 
     variables:
       catalog: fintech_finpay
-      schema: prod
+      schema: default
       landing_volume: vol_landing
+      warehouse_id: "c6cb83fa9d6d6137"
+      notification_email: carlos.garciah@pucp.edu.pe
+      pipeline_development: false
+      cluster_policy_id: ""
 
     permissions:
       - user_name: carlos.garciah@pucp.edu.pe

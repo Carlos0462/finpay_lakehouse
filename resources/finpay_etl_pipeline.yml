@@ -1,0 +1,39 @@
+# resources/finpay_etl_pipeline.yml
+
+resources:
+  pipelines:
+    finpay_etl_pipeline:
+      name: finpay_etl_pipeline_${bundle.target}
+
+      catalog: ${var.catalog}
+      schema: default
+
+      serverless: true
+
+      root_path: ../src
+
+      libraries:
+        - file:
+            path: ../src/utils.py
+        - file:
+            path: ../src/bronze.py
+        - file:
+            path: ../src/silver.py
+        - file:
+            path: ../src/gold.py
+
+      configuration:
+        finpay.catalog: ${var.catalog}
+        finpay.default_schema: default
+        finpay.landing_volume: ${var.landing_volume}
+        finpay.ingestion_archetypes_path: /Volumes/${var.catalog}/default/${var.landing_volume}/metadata/ingestion_archetypes.json
+
+      event_log:
+        catalog: ${var.catalog}
+        schema: observability
+        name: finpay_etl_pipeline_event_log
+
+      channel: CURRENT
+      edition: ADVANCED
+      photon: false
+      development: true

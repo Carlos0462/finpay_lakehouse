@@ -1,0 +1,34 @@
+{
+  "displayName": "FinPay Observability Dashboard",
+  "name": "FinPay Observability Dashboard",
+  "description": "Dashboard de observabilidad del Lakeflow Pipeline FinPay.",
+  "datasets": [
+    {
+      "name": "processed_records_by_layer",
+      "displayName": "Registros procesados por capa",
+      "query": "SELECT event_date, layer, SUM(processed_records) AS processed_records FROM fintech_finpay_dev.observability.v_processed_records_by_layer GROUP BY event_date, layer ORDER BY event_date, layer"
+    },
+    {
+      "name": "rejected_records",
+      "displayName": "Registros rechazados por calidad",
+      "query": "SELECT event_date, layer, source_name, rejection_reason, SUM(rejected_records) AS rejected_records FROM fintech_finpay_dev.observability.v_rejected_records GROUP BY event_date, layer, source_name, rejection_reason ORDER BY event_date, layer, source_name"
+    },
+    {
+      "name": "rejection_rate_by_layer",
+      "displayName": "Tasa de rechazo por capa",
+      "query": "SELECT event_date, layer, processed_records, rejected_records, rejection_rate FROM fintech_finpay_dev.observability.v_rejection_rate_by_layer ORDER BY event_date, layer"
+    },
+    {
+      "name": "flow_progress",
+      "displayName": "Progreso por flujo",
+      "query": "SELECT event_date, layer, flow_name, flow_status, input_records, processed_records FROM fintech_finpay_dev.observability.v_processed_records_by_layer ORDER BY event_date, layer, flow_name"
+    }
+  ],
+  "pages": [
+    {
+      "name": "observability",
+      "displayName": "Observabilidad",
+      "layout": []
+    }
+  ]
+}
