@@ -284,7 +284,7 @@ def add_bronze_change_columns(df: DataFrame, source_name: str) -> DataFrame:
 # Silver/Bronze valid changes: catálogos
 # ============================================================
 
-VALID_COUNTRIES = ["PE", "CO", "MX", "CL", "AR"]
+VALID_COUNTRIES = ["PE", "CO", "MX", "CL", "AR", "EC", "BR"]
 
 VALID_CHANNELS = ["web", "app", "pos"]
 VALID_TRANSACTION_TYPES = ["pago", "reversa", "retiro"]
@@ -371,11 +371,13 @@ def normalize_country_expr(column_name: str):
 
     return (
         F.when(value.isNull(), F.lit(None).cast("string"))
-        .when(value.isin("PE", "PER", "PERU"), F.lit("PE"))
+        .when(value.isin("PE", "PER", "PERU", "PERÚ"), F.lit("PE"))
         .when(value.isin("CO", "COL", "COLOMBIA"), F.lit("CO"))
-        .when(value.isin("MX", "MEX", "MEXICO"), F.lit("MX"))
+        .when(value.isin("MX", "MEX", "MEXICO", "MÉXICO"), F.lit("MX"))
         .when(value.isin("CL", "CHI", "CHILE"), F.lit("CL"))
         .when(value.isin("AR", "ARG", "ARGENTINA"), F.lit("AR"))
+        .when(value.isin("EC", "ECU", "ECUADOR"), F.lit("EC"))
+        .when(value.isin("BR", "BRA", "BRASIL", "BRAZIL"), F.lit("BR"))
         .otherwise(value)
     )
 
@@ -404,7 +406,15 @@ def normalize_risk_level_expr(column_name: str):
 
 def normalize_segment_expr(column_name: str):
     value = lower_clean(column_name)
-    return F.when(value.isin(*VALID_USER_SEGMENTS), value).otherwise(value)
+
+    return (
+        F.when(value.isNull(), F.lit(None).cast("string"))
+        .when(value.isin("standard", "std", "regular"), F.lit("estandar"))
+        .when(value.isin("estándar", "estandar"), F.lit("estandar"))
+        .when(value.isin("vip", "premium"), F.lit("premium"))
+        .when(value.isin("new", "nuevo"), F.lit("nuevo"))
+        .otherwise(value)
+    )
 
 
 def normalize_email_expr(column_name: str):

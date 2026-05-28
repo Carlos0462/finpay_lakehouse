@@ -267,13 +267,13 @@ def build_users_typed_changes():
         .withColumn("registration_date", parse_date_multi("registration_date"))
     )
 
+    # Reglas críticas para usuarios.
+    # No bloqueamos país, segmento, email, teléfono ni documento para evitar
+    # enviar registros recuperables a cuarentena. Esos campos se conservan en
+    # Silver para análisis y pueden auditarse con reglas no bloqueantes.
     quality_rules = {
-        "user_id inválido o nulo": ~F.col("user_id").rlike(r"^USR-\d{6}$") | F.col("user_id").isNull(),
+        "user_id nulo": F.col("user_id").isNull(),
         "full_name vacío o nulo": F.col("full_name").isNull(),
-        "document_id inválido": F.col("document_id").isNull() | ~F.col("document_id").rlike(r"^[0-9]{7,12}$"),
-        "email inválido": F.col("email").isNull() | ~F.col("email").rlike(r"^[A-Za-z0-9._%+\-ÁÉÍÓÚáéíóúÑñ]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$"),
-        "phone inválido": F.col("phone").isNull() | ~F.col("phone").rlike(r"^\+?[0-9]{9,15}$"),
-        "segment fuera de catálogo": F.col("segment").isNotNull() & ~F.col("segment").isin(*VALID_USER_SEGMENTS),
         "registration_date inválida": F.col("registration_date").isNull(),
     }
 
