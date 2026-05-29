@@ -1,0 +1,714 @@
+{
+  "datasets": [
+    {
+      "name": "processed_records_by_layer",
+      "displayName": "Registros procesados por capa",
+      "queryLines": [
+        "SELECT\n",
+        "  event_date,\n",
+        "  layer,\n",
+        "  SUM(processed_records) AS processed_records\n",
+        "FROM\n",
+        "  fintech_finpay_dev.observability.v_processed_records_by_layer\n",
+        "GROUP BY\n",
+        "  event_date,\n",
+        "  layer"
+      ]
+    },
+    {
+      "name": "rejected_records",
+      "displayName": "Registros rechazados por calidad",
+      "queryLines": [
+        "SELECT event_date, layer, source_name, rejection_reason, SUM(rejected_records) AS rejected_records FROM fintech_finpay_dev.observability.v_rejected_records GROUP BY event_date, layer, source_name, rejection_reason ORDER BY event_date, layer, source_name"
+      ]
+    },
+    {
+      "name": "rejection_rate_by_layer",
+      "displayName": "Tasa de rechazo por capa",
+      "queryLines": [
+        "SELECT event_date, layer, processed_records, rejected_records, rejection_rate FROM fintech_finpay_dev.observability.v_rejection_rate_by_layer ORDER BY event_date, layer"
+      ]
+    },
+    {
+      "name": "flow_progress",
+      "displayName": "Progreso por flujo",
+      "queryLines": [
+        "SELECT\n",
+        "  event_date,\n",
+        "  layer,\n",
+        "  flow_name,\n",
+        "  flow_status,\n",
+        "  input_records,\n",
+        "  processed_records\n",
+        "FROM\n",
+        "  fintech_finpay_dev.observability.v_processed_records_by_layer"
+      ]
+    },
+    {
+      "name": "overall_rejection_rate_kpi",
+      "displayName": "Overall Rejection Rate KPI",
+      "queryLines": [
+        "SELECT\n",
+        "  CASE\n",
+        "    WHEN SUM(processed_records) = 0 THEN 0\n",
+        "    ELSE SUM(rejected_records) / SUM(processed_records)\n",
+        "  END AS overall_rejection_rate\n",
+        "FROM\n",
+        "  fintech_finpay_dev.observability.v_rejection_rate_by_layer"
+      ]
+    },
+    {
+      "name": "total_rejected_kpi",
+      "displayName": "Total Rejected Records KPI",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(rejected_records) AS total_rejected_records\n",
+        "FROM\n",
+        "  fintech_finpay_dev.observability.v_rejected_records"
+      ]
+    },
+    {
+      "name": "total_processed_kpi",
+      "displayName": "Total Processed Records KPI",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(processed_records) AS total_processed_records\n",
+        "FROM\n",
+        "  fintech_finpay_dev.observability.v_processed_records_by_layer"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "observability",
+      "displayName": "Observabilidad",
+      "layout": [
+        {
+          "widget": {
+            "name": "kpi_total_processed",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "total_processed_kpi",
+                  "fields": [
+                    {
+                      "name": "sum(total_processed_records)",
+                      "expression": "SUM(`total_processed_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "format": {
+                "numberFormat": {
+                  "formatType": "numeral",
+                  "format": "0,0"
+                }
+              },
+              "frame": {
+                "title": "Total Processed Records",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_processed_records)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_total_rejected",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "total_rejected_kpi",
+                  "fields": [
+                    {
+                      "name": "sum(total_rejected_records)",
+                      "expression": "SUM(`total_rejected_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "format": {
+                "numberFormat": {
+                  "formatType": "numeral",
+                  "format": "0,0"
+                }
+              },
+              "frame": {
+                "title": "Total Rejected Records",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_rejected_records)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_rejection_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "overall_rejection_rate_kpi",
+                  "fields": [
+                    {
+                      "name": "sum(overall_rejection_rate)",
+                      "expression": "SUM(`overall_rejection_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "format": {
+                "percentFormat": {
+                  "formatType": "numeral",
+                  "format": "0.00%"
+                }
+              },
+              "frame": {
+                "title": "Overall Rejection Rate",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(overall_rejection_rate)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_processed_by_layer",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "processed_records_by_layer",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "sum(processed_records)",
+                      "expression": "SUM(`processed_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Processed Records by Layer",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "event_date",
+                  "axis": {
+                    "title": "Event Date"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(processed_records)",
+                  "axis": {
+                    "title": "Processed Records"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "layer",
+                  "legend": {
+                    "title": "Layer"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_rejected_by_source",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "rejected_records",
+                  "fields": [
+                    {
+                      "name": "rejection_reason",
+                      "expression": "`rejection_reason`"
+                    },
+                    {
+                      "name": "source_name",
+                      "expression": "`source_name`"
+                    },
+                    {
+                      "name": "sum(rejected_records)",
+                      "expression": "SUM(`rejected_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Rejected Records by Source & Reason",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "source_name",
+                  "axis": {
+                    "title": "Source Name"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(rejected_records)",
+                  "axis": {
+                    "title": "Rejected Records"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "rejection_reason",
+                  "legend": {
+                    "title": "Rejection Reason"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "line_processed_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "processed_records_by_layer",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "sum(processed_records)",
+                      "expression": "SUM(`processed_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Processed Records Trend",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "event_date",
+                  "axis": {
+                    "title": "Event Date"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(processed_records)",
+                  "axis": {
+                    "title": "Processed Records"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "layer",
+                  "legend": {
+                    "title": "Layer"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "line_rejection_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "rejection_rate_by_layer",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "avg(rejection_rate)",
+                      "expression": "AVG(`rejection_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Rejection Rate by Layer",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "event_date",
+                  "axis": {
+                    "title": "Event Date"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(rejection_rate)",
+                  "axis": {
+                    "title": "Rejection Rate"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "layer",
+                  "legend": {
+                    "title": "Layer"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_processed_by_flow",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "flow_progress",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "flow_name",
+                      "expression": "`flow_name`"
+                    },
+                    {
+                      "name": "sum(processed_records)",
+                      "expression": "SUM(`processed_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Processed Records by Flow/Table",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "flow_name",
+                  "axis": {
+                    "title": "Flow/Table Name"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(processed_records)",
+                  "axis": {
+                    "title": "Processed Records"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "layer",
+                  "legend": {
+                    "title": "Layer"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "date_range_filter",
+            "queries": [
+              {
+                "name": "dashboards/01f15ad2d4ba19688fa894834f1b8b28/datasets/01f15ad2d4ba1aa9b89aafe1d42b2171_event_date",
+                "query": {
+                  "datasetName": "processed_records_by_layer",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "event_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Date Range",
+                "showTitle": true
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "dashboards/01f15ad2d4ba19688fa894834f1b8b28/datasets/01f15ad2d4ba1aa9b89aafe1d42b2171_event_date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "layer_filter",
+            "queries": [
+              {
+                "name": "dashboards/01f15ad2d4ba19688fa894834f1b8b28/datasets/01f15ad2d4ba1aa9b89aafe1d42b2171_layer",
+                "query": {
+                  "datasetName": "processed_records_by_layer",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "layer_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "scale": {
+                "type": "categorical"
+              },
+              "frame": {
+                "title": "Layer",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "layer",
+                    "queryName": "dashboards/01f15ad2d4ba19688fa894834f1b8b28/datasets/01f15ad2d4ba1aa9b89aafe1d42b2171_layer"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ]
+}

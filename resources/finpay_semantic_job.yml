@@ -1,0 +1,53 @@
+# resources/finpay_semantic_job.yml
+# Job 2 - Modelo semántico
+# Ejecuta únicamente el notebook 02_refresh_materialized_views
+# usando el catálogo del target DAB.
+
+resources:
+  jobs:
+    finpay_semantic_job:
+      name: finpay_semantic_job_${bundle.target}
+
+      description: >
+        Job de modelo semántico FinPay. Refresca las Materialized Views
+        dimensionales construidas sobre las tablas Gold. Este job debe
+        ejecutarse únicamente después de que finpay_ingestion_job haya
+        finalizado exitosamente.
+
+      tags:
+        project: finpay_lakehouse
+        job_type: semantic_model
+        environment: ${bundle.target}
+        owner: data_engineering
+
+      email_notifications:
+        on_failure:
+          - ${var.notification_email}
+
+      notification_settings:
+        no_alert_for_skipped_runs: false
+
+      timeout_seconds: 3600
+      max_concurrent_runs: 1
+
+      tasks:
+        - task_key: refresh_materialized_views
+          description: >
+            Ejecuta el notebook 02_refresh_materialized_views.
+            El notebook contiene únicamente sentencias REFRESH MATERIALIZED VIEW.
+
+          notebook_task:
+            notebook_path: ${workspace.file_path}/notebooks/02_refresh_materialized_views
+            source: WORKSPACE
+            warehouse_id: ${var.warehouse_id}
+            base_parameters:
+              catalog: ${var.catalog}
+
+          max_retries: 2
+          min_retry_interval_millis: 300000
+          retry_on_timeout: true
+          timeout_seconds: 3600
+
+          email_notifications:
+            on_failure:
+              - ${var.notification_email}
