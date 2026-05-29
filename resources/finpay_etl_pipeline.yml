@@ -36,4 +36,4 @@ resources:
       channel: CURRENT
       edition: ADVANCED
       photon: false
-      development: true
+      development: ${var.pipeline_development}
