@@ -1,7 +1,12 @@
+# resources/finpay_observability_dashboard.yml
+# Dashboard AI/BI de observabilidad FinPay.
+# El archivo del dashboard cambia por target:
+#   DEV  -> dashboard/observability_dev.lvdash.json
+#   PROD -> dashboard/observability_prod.lvdash.json
 
 resources:
   dashboards:
     finpay_observability_dashboard:
       display_name: FinPay Observability Dashboard - ${bundle.target}
-      file_path: ../dashboards/observability.lvdash.json
+      file_path: ${var.observability_dashboard_file}
       warehouse_id: ${var.warehouse_id}

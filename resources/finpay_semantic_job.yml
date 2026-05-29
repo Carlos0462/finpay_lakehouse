@@ -1,4 +1,7 @@
 # resources/finpay_semantic_job.yml
+# Job 2 - Modelo semántico
+# Ejecuta únicamente el notebook 02_refresh_materialized_views
+# usando el catálogo del target DAB.
 
 resources:
   jobs:
@@ -30,13 +33,15 @@ resources:
       tasks:
         - task_key: refresh_materialized_views
           description: >
-            Ejecuta el notebook 02_refresh_materialized_views.ipynb.
+            Ejecuta el notebook 02_refresh_materialized_views.
             El notebook contiene únicamente sentencias REFRESH MATERIALIZED VIEW.
 
           notebook_task:
             notebook_path: ${workspace.file_path}/notebooks/02_refresh_materialized_views
             source: WORKSPACE
             warehouse_id: ${var.warehouse_id}
+            base_parameters:
+              catalog: ${var.catalog}
 
           max_retries: 2
           min_retry_interval_millis: 300000

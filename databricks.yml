@@ -46,7 +46,7 @@ variables:
 
   warehouse_id:
     description: SQL Warehouse ID used by semantic/materialized view jobs
-    default: ""
+    default: "c6cb83fa9d6d6137"
 
   notification_email:
     description: Email para alertas de fallo de jobs y pipelines
@@ -59,6 +59,10 @@ variables:
   cluster_policy_id:
     description: Cluster policy ID para jobs o pipelines cuando aplique
     default: ""
+
+  observability_dashboard_file:
+    description: Archivo .lvdash.json del dashboard de observabilidad según target
+    default: ../dashboard/observability_dev.lvdash.json
 
 targets:
   dev:
@@ -77,6 +81,7 @@ targets:
       notification_email: carlos.garciah@pucp.edu.pe
       pipeline_development: true
       cluster_policy_id: ""
+      observability_dashboard_file: ../dashboard/observability_dev.lvdash.json
 
     permissions:
       - user_name: carlos.garciah@pucp.edu.pe
@@ -97,6 +102,7 @@ targets:
       notification_email: carlos.garciah@pucp.edu.pe
       pipeline_development: false
       cluster_policy_id: ""
+      observability_dashboard_file: ../dashboard/observability_prod.lvdash.json
 
     permissions:
       - user_name: carlos.garciah@pucp.edu.pe
